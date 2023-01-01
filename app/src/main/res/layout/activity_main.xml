@@ -15,6 +15,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginRight="10dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal"
         android:background="@drawable/retangle_select">
 
@@ -26,7 +27,10 @@
             android:paddingLeft="10dp"
             android:textSize="18sp"
             android:background="@null"
-          />
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:singleLine="true"
+            />
 
         <Button
             android:id="@+id/btn_enter"

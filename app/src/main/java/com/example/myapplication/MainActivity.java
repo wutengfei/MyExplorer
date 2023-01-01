@@ -4,35 +4,28 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.health.SystemHealthManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
-import android.util.TimeUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.DownloadListener;
-import android.webkit.URLUtil;
-import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
-import android.webkit.WebHistoryItem;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -42,11 +35,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -76,30 +68,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initWebView(webview);
         btn_enter.setOnClickListener(this);
 
+        //在该Editview获得焦点的时候将“回车”键改为“搜索”
+        et_url.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        et_url.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+        //不然回车【搜索】会换行
+        et_url.setSingleLine(true);
+        et_url.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if ((actionId == EditorInfo.IME_ACTION_UNSPECIFIED || actionId == EditorInfo.IME_ACTION_SEARCH) && keyEvent != null) {
+                    //点击搜索要做的操作
+                    search(et_url);
+                    return true;
+                }
+                return false;
+            }
+        });
+
     }
 
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btn_enter) {
-            String url = et_url.getText().toString().trim();
-            if (!TextUtils.isEmpty(url)) {
-                if (url.contains("https") || url.contains("http")) {
-                    webview.loadUrl(url);
-                } else {
-                    String url_enter = "https://" + url;
-                    boolean isMatchesUrl = Patterns.WEB_URL.matcher(url_enter).matches();
-                    if (isMatchesUrl) {
-                        webview.loadUrl(url_enter);
-                    } else {
-                        webview.loadUrl("https://www.baidu.com/s?wd=" + url);
-                    }
+            search(view);
+        }
+    }
 
+    private void search(View view) {
+        String url = et_url.getText().toString().trim();
+        if (!TextUtils.isEmpty(url)) {
+            if (url.startsWith("https") || url.startsWith("http")) {
+                webview.loadUrl(url);
+            } else {
+                String url_enter = "https://" + url;
+                boolean isMatchesUrl = Patterns.WEB_URL.matcher(url_enter).matches();
+                if (isMatchesUrl) {
+                    webview.loadUrl(url_enter);
+                } else {
+                    webview.loadUrl("https://www.baidu.com/s?wd=" + url);
                 }
 
             }
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
         }
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -229,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onShowCustomView(View view, CustomViewCallback callback) {
             super.onShowCustomView(view, callback);
             isLandscape = true;
-//            Objects.requireNonNull(getSupportActionBar()).hide();
             //如果view 已经存在，则隐藏
             if (mCustomView != null) {
                 callback.onCustomViewHidden();
@@ -254,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onHideCustomView() {
             super.onHideCustomView();
             isLandscape = false;
-//            Objects.requireNonNull(getSupportActionBar()).show();
             ll_title.setVisibility(View.VISIBLE);
             webview.setVisibility(View.VISIBLE);
             if (mCustomView == null) {
