@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView.getSettings().setAllowFileAccessFromFileURLs(false);//设置WebView运行中的一个文件方案被允许访问其他文件方案中的内容，默认值true
         webView.getSettings().setAllowContentAccess(false);//设置WebView是否使用其内置的变焦机制，该机制结合屏幕缩放控件使用，默认是false，不使用内置变焦机制
         webView.getSettings().setAllowUniversalAccessFromFileURLs(true);//设置WebView运行中的脚本可以是否访问任何原始起点内容，默认true
-        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(false);//设置是否开启DOM存储API权限，默认false，未开启，设置为true，WebView能够使用DOM storage API
         webView.getSettings().setPluginState(WebSettings.PluginState.ON);
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         webView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        webView.setFocusable(false);// 去掉超链接的外边框
+        webView.setFocusable(true);// 去掉超链接的外边框
         webView.getSettings().setDefaultTextEncodingName("GBK");//设置文本编码（根据页面要求设置： utf-8）
         webView.setWebChromeClient(new MyWebChromeClient());
 
