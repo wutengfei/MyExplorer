@@ -1,9 +1,5 @@
 package com.example.myapplication;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -37,6 +33,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Objects;
 
@@ -156,14 +156,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                WebView.HitTestResult hitTestResult = view.getHitTestResult();
-                //hitTestResult==null解决重定向问题
-                if (!TextUtils.isEmpty(url) && hitTestResult == null) {
-                    view.loadUrl(url);
-                    return true;
+                if (url.startsWith("http") || url.startsWith("https")) {
+                    WebView.HitTestResult hitTestResult = view.getHitTestResult();
+                    //hitTestResult==null解决重定向问题
+                    if (!TextUtils.isEmpty(url) && hitTestResult == null) {
+                        view.loadUrl(url);
+                        return true;
+                    } else {
+                        return super.shouldOverrideUrlLoading(view, url);
+                    }
                 } else {
-                    return super.shouldOverrideUrlLoading(view, url);
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                        return true;
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "不支持的协议类型", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+
                 }
+
 
             }
 
