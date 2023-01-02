@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView.getSettings().setLoadsImagesAutomatically(true);//设置WebView是否加载图片资源，默认true，自动加载图片
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);//设置脚本是否允许自动打开弹窗，默认false，不允许
 
-        webView.getSettings().setSupportMultipleWindows(true);
         webView.setVerticalScrollBarEnabled(false);// 取消Vertical ScrollBar显示
         webView.setHorizontalScrollBarEnabled(false);// 取消Horizontal ScrollBar显示
         //设置自适应屏幕，两者合用
