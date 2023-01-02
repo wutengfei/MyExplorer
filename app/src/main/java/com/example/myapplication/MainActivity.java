@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -23,7 +22,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -34,7 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -179,19 +176,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
 
-            @Nullable
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
-                if (url.contains(".mp4") || url.contains(".m3u8?") || url.contains(".avi") ||
-                        url.contains(".mov") || url.contains(".mkv") || url.contains(".flv") ||
-                        url.contains(".f4v") || url.contains(".rmvb")) {
-
-                    Log.e("video_url", url);
-
-                }
-                return super.shouldInterceptRequest(view, request);
-            }
         });
 
         webView.setOnKeyListener(new View.OnKeyListener() {//防止遇到重定向
