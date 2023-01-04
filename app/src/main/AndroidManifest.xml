@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.myapplication">
+    package="com.feige.myexplorer">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /><!--粗略位置-->
@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".MainActivity"
+            android:name="com.feige.myexplorer.MainActivity"
             android:configChanges="orientation|keyboardHidden|navigation|screenSize"
             android:hardwareAccelerated="true"
             android:screenOrientation="portrait">
