@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -47,6 +48,9 @@ import java.util.Objects;
 import cn.org.bjca.signet.component.qr.activity.SignetQrApi;
 import cn.org.bjca.signet.component.qr.bean.QrResultBean;
 import cn.org.bjca.signet.component.qr.callback.QrBaseCallBack;
+
+import static com.feige.myexplorer.utils.PicUtils.savePicture;
+import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -252,6 +256,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
             }
         });
+        webView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                WebView.HitTestResult result = ((WebView) v).getHitTestResult();
+                int type = result.getType();
+                switch (type) {
+                    case WebView.HitTestResult.EDIT_TEXT_TYPE: // 选中的文字类型
+                        break;
+                    case WebView.HitTestResult.PHONE_TYPE: // 处理拨号
+                        break;
+                    case WebView.HitTestResult.EMAIL_TYPE: // 处理Email
+                        break;
+                    case WebView.HitTestResult.GEO_TYPE: // &emsp;地图类型
+                        break;
+                    case WebView.HitTestResult.SRC_ANCHOR_TYPE: // 超链接
+                        break;
+                    case WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE: // 带有链接的图片类型
+                    case WebView.HitTestResult.IMAGE_TYPE: // 处理长按图片的菜单项
+                        final String url = result.getExtra();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (URLUtil.isValidUrl(url)) {
+                                    url2bitmap(context, url);
+                                } else {
+                                    savePicture(context, url);
+                                }
+                            }
+                        }).start();
+                        break;
+                    case WebView.HitTestResult.UNKNOWN_TYPE: //未知
+                        break;
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -379,7 +420,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == QRSCAN_REQ_CAMERA_PERMISSION) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
