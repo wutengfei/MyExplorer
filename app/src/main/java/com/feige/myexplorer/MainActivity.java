@@ -49,7 +49,8 @@ import cn.org.bjca.signet.component.qr.activity.SignetQrApi;
 import cn.org.bjca.signet.component.qr.bean.QrResultBean;
 import cn.org.bjca.signet.component.qr.callback.QrBaseCallBack;
 
-import static com.feige.myexplorer.utils.PicUtils.savePicture;
+import static com.feige.myexplorer.utils.OtherUtils.showAlert;
+import static com.feige.myexplorer.utils.PicUtils.base64Url2bitmap;
 import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -65,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Context context;
     private static final int QRSCAN_REQ_CAMERA_PERMISSION = 776;
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void search(View view) {
         webview.removeAllViews();
         String url = et_url.getText().toString().trim();
@@ -177,9 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initWebView(final WebView webView) {
-
         webView.getSettings().setDatabaseEnabled(true);
         webView.getSettings().setAllowFileAccess(true);//设置在WebView内部是否允许访问文件，默认允许访问。
         webView.getSettings().setAllowFileAccessFromFileURLs(true);//设置WebView运行中的一个文件方案被允许访问其他文件方案中的内容，默认值true
@@ -275,17 +272,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         break;
                     case WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE: // 带有链接的图片类型
                     case WebView.HitTestResult.IMAGE_TYPE: // 处理长按图片的菜单项
-                        final String url = result.getExtra();
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (URLUtil.isValidUrl(url)) {
-                                    url2bitmap(context, url);
-                                } else {
-                                    savePicture(context, url);
-                                }
-                            }
-                        }).start();
+                        savePicture2Gallery(result);
                         break;
                     case WebView.HitTestResult.UNKNOWN_TYPE: //未知
                         break;
@@ -293,6 +280,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             }
         });
+
+    }
+
+    /**
+     * 保存图片到相册
+     *
+     * @param result
+     */
+    private void savePicture2Gallery(final WebView.HitTestResult result) {
+        showAlert(context, "提示", "是否保存图片", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String url = result.getExtra();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (URLUtil.isValidUrl(url)) {
+                            url2bitmap(context, url);
+                        } else {
+                            if (url != null) {
+                                base64Url2bitmap(context, url);
+                            }
+                        }
+                    }
+                }).start();
+            }
+        }, true);
 
     }
 

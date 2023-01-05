@@ -100,7 +100,7 @@ public class PicUtils {
      * @param mContext
      * @param base64DataStr
      */
-    public static void savePicture(final Context mContext, String base64DataStr) {
+    public static void base64Url2bitmap(final Context mContext, String base64DataStr) {
         BufferedInputStream bis = null;
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
