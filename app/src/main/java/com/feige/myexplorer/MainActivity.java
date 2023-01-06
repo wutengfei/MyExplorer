@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -25,7 +24,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -53,6 +51,11 @@ import static com.feige.myexplorer.utils.OtherUtils.showAlert;
 import static com.feige.myexplorer.utils.PicUtils.base64Url2bitmap;
 import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
 
+/**
+ * Author: wutengfei
+ * Date: 2023/1/1
+ * Description:  首页
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText et_url;
@@ -62,9 +65,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean mIsExit;
     private FrameLayout mLayout;
     private LinearLayout ll_title;
-    private boolean isLandscape;
+    public static boolean isLandscape;
     private Context context;
     private static final int QRSCAN_REQ_CAMERA_PERMISSION = 776;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,21 +79,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Window window = this.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(this.getResources().getColor(R.color.color_notify_bar));
+        initView();
+        initListener();
+        initData();
+    }
 
+    private void initView() {
         et_url = findViewById(R.id.et_url);
         btn_enter = findViewById(R.id.btn_enter);
         qr_scan = findViewById(R.id.qr_scan);
         webview = findViewById(R.id.webview);
         mLayout = findViewById(R.id.fl_video);
         ll_title = findViewById(R.id.ll_title);
+    }
+
+    private void initListener() {
         btn_enter.setOnClickListener(this);
         qr_scan.setOnClickListener(this);
-        initWebView(webview);
         //在该Editview获得焦点的时候将“回车”键改为“搜索”
         et_url.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         et_url.setInputType(EditorInfo.TYPE_CLASS_TEXT);
-        //不然回车【搜索】会换行
-        et_url.setSingleLine(true);
+        et_url.setSingleLine(true);  //不然回车【搜索】会换行
         et_url.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -101,6 +111,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             }
         });
+
+        et_url.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                et_url.requestFocus();
+                et_url.selectAll();
+            }
+        });
+    }
+
+    private void initData() {
+        initWebView(webview);
 
     }
 
@@ -190,21 +212,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 //        webView.setVerticalScrollBarEnabled(false);// 取消Vertical ScrollBar显示
 //        webView.setHorizontalScrollBarEnabled(false);// 取消Horizontal ScrollBar显示
-        webView.setWebChromeClient(new MyWebChromeClient());
+        webView.setWebChromeClient(new MyWebChromeClient(context, mLayout, webview, ll_title));
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
+//                Log.e(TAG, "onPageStarted: url-" + url);
                 super.onPageStarted(view, url, favicon);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
+//                Log.e(TAG, "onPageFinished: url-" + url);
+                et_url.setText(url);
                 super.onPageFinished(view, url);
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
                 String url = webResourceRequest.getUrl().toString();
+//                Log.e(TAG, "shouldOverrideUrlLoading: url-" + url);
                 if (url.startsWith("http") || url.startsWith("https")) {
                     WebView.HitTestResult hitTestResult = webView.getHitTestResult();
                     //hitTestResult==null解决重定向问题
@@ -328,61 +354,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
                 break;
         }
-    }
-
-    private class MyWebChromeClient extends WebChromeClient {
-
-        private CustomViewCallback mCustomViewCallback;
-        //  横屏时，显示视频的view
-        private View mCustomView;
-
-        // 全屏的时候调用
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-        @Override
-        public void onShowCustomView(View view, CustomViewCallback callback) {
-            super.onShowCustomView(view, callback);
-            isLandscape = true;
-            //如果view 已经存在，则隐藏
-            if (mCustomView != null) {
-                callback.onCustomViewHidden();
-                return;
-            }
-
-            mCustomView = view;
-            mCustomView.setVisibility(View.VISIBLE);
-            mCustomViewCallback = callback;
-            mLayout.addView(mCustomView);
-            mLayout.setVisibility(View.VISIBLE);
-            mLayout.bringToFront();
-            ll_title.setVisibility(View.GONE);
-            //设置横屏
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            webview.setVisibility(View.GONE);
-        }
-
-        // 切换为竖屏的时候调用
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-        @Override
-        public void onHideCustomView() {
-            super.onHideCustomView();
-            isLandscape = false;
-            ll_title.setVisibility(View.VISIBLE);
-            webview.setVisibility(View.VISIBLE);
-            if (mCustomView == null) {
-                mLayout.setVisibility(View.GONE);
-                return;
-            }
-            mCustomView.setVisibility(View.GONE);
-            mLayout.removeView(mCustomView);
-            mCustomView = null;
-            mLayout.setVisibility(View.GONE);
-            try {
-                mCustomViewCallback.onCustomViewHidden();
-            } catch (Exception e) {
-            }
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//竖屏
-        }
-
     }
 
     @Override
