@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Context context;
     private static final int QRSCAN_REQ_CAMERA_PERMISSION = 776;
     private static final String TAG = "MainActivity";
+    private boolean isSelectAll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,8 +116,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         et_url.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                et_url.requestFocus();
-                et_url.selectAll();
+                if (!isSelectAll) {
+                    et_url.selectAll();
+                    isSelectAll = true;
+                } else {
+                    isSelectAll = false;
+                }
             }
         });
     }
@@ -271,9 +276,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         webView.setDownloadListener(new DownloadListener() {
             @Override
-            public void onDownloadStart(String s, String s1, String s2, String s3, long l) {
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                Uri uri = Uri.parse(s);
+                Uri uri = Uri.parse(url);
                 intent.addCategory(Intent.CATEGORY_BROWSABLE);
                 intent.setData(uri);
                 startActivity(intent);
