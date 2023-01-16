@@ -33,6 +33,8 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +43,9 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.feige.myexplorer.adapter.MyAdapter;
+
+import java.util.ArrayList;
 import java.util.Objects;
 
 import cn.org.bjca.signet.component.qr.activity.SignetQrApi;
@@ -70,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int QRSCAN_REQ_CAMERA_PERMISSION = 776;
     private static final String TAG = "MainActivity";
     private boolean isSelectAll;
+    private ArrayList<String> data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Objects.requireNonNull(getSupportActionBar()).hide();
         Window window = this.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(this.getResources().getColor(R.color.color_notify_bar));
+        window.setStatusBarColor(this.getResources().getColor(R.color.gray));
         initView();
         initListener();
         initData();
@@ -116,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         et_url.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                showDropDown();
                 if (!isSelectAll) {
                     et_url.selectAll();
                     isSelectAll = true;
@@ -153,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (url.startsWith("https") || url.startsWith("http")) {
                 webview.loadUrl(url);
             } else {
-                String url_enter = "https://" + url;
+                String url_enter = "http://" + url;
                 boolean isMatchesUrl = Patterns.WEB_URL.matcher(url_enter).matches();
                 if (isMatchesUrl) {
                     webview.loadUrl(url_enter);
@@ -201,6 +208,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+    }
+
+    private void showDropDown() {
+        View popView = getLayoutInflater().inflate(R.layout.listview, null);
+        PopupWindow popupWindow = new PopupWindow(popView, et_url.getWidth(), LinearLayout.LayoutParams.WRAP_CONTENT);
+        if (data == null || data.size() == 0) {
+            data = new ArrayList<String>();
+            data.add("http://m.keyou666.com");
+            data.add("https://www.80sl.com");
+            data.add("https://www.yszj.tv");
+            data.add("http://k1k.cc/ju/list");
+            data.add("http://www.007xgt.com");
+            data.add("http://www.bajjj.com");
+            data.add("https://www.chengshuwei.top");
+            data.add("https://www.kuaiju5.com");
+            data.add("https://www.170dy.tv");
+            data.add("https://www.jsdrtzn.com");
+            data.add("http://www.imj6.com");
+            data.add("https://www.zwekj.com");
+            data.add("https://meijui.cc");
+            data.add("https://www.bbzmj.com");
+            data.add("https://www.meijuw.com");
+            data.add("https://cucxsh.cn");
+            data.add("https://meijuii.cc");
+            data.add("https://m.meijutt.org");
+        }
+        MyAdapter adapter = new MyAdapter(context, data, et_url, webview, popupWindow);
+        ListView listView = popView.findViewById(R.id.listview);
+        listView.setAdapter(adapter);
+        popupWindow.setFocusable(false);
+        popupWindow.setTouchable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setHeight(800);
+        popupWindow.showAsDropDown(et_url);
     }
 
     private void initWebView(final WebView webView) {
