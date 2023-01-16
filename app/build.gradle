@@ -20,6 +20,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            //这里修改apk文件名
+            outputFileName = "MyExplorer_V${defaultConfig.versionName}.apk"
+        }
+    }
 }
 
 dependencies {
