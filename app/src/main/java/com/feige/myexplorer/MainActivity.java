@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,13 +23,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -46,6 +42,14 @@ import androidx.core.content.ContextCompat;
 
 import com.feige.myexplorer.adapter.MyAdapter;
 import com.feige.myexplorer.utils.AdBlocker;
+import com.feige.myexplorer.utils.X5ProcessInitService;
+import com.tencent.smtt.export.external.TbsCoreSettings;
+import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.DownloadListener;
+import com.tencent.smtt.sdk.QbSdk;
+import com.tencent.smtt.sdk.WebView;
+import com.tencent.smtt.sdk.WebViewClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,7 +144,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() {
+        if (!startX5WebProcessPreinitService()) {
+            return;
+        }
+        // 在调用TBS初始化、创建WebView之前进行如下配置
+        HashMap map = new HashMap();
+        map.put(TbsCoreSettings.TBS_SETTINGS_USE_SPEEDY_CLASSLOADER, true);
+        map.put(TbsCoreSettings.TBS_SETTINGS_USE_DEXLOADER_SERVICE, true);
+        QbSdk.initTbsSettings(map);
+
         initWebView(webview);
+
+        QbSdk.setDownloadWithoutWifi(true);
+        QbSdk.initX5Environment(context, new QbSdk.PreInitCallback() {
+            @Override
+            public void onCoreInitFinished() {
+                // 内核初始化完成，可能为系统内核，也可能为系统内核
+            }
+
+            /**
+             * 预初始化结束
+             * 由于X5内核体积较大，需要依赖网络动态下发，所以当内核不存在的时候，默认会回调false，此时将会使用系统内核代替
+             * @param isX5 是否使用X5内核
+             */
+            @Override
+            public void onViewInitFinished(boolean isX5) {
+
+            }
+        });
 
     }
 
@@ -256,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView.getSettings().setAllowFileAccessFromFileURLs(true);//设置WebView运行中的一个文件方案被允许访问其他文件方案中的内容，默认值true
         webView.getSettings().setAllowContentAccess(true);//设置WebView是否使用其内置的变焦机制，该机制结合屏幕缩放控件使用，默认是false，不使用内置变焦机制
         webView.getSettings().setAllowUniversalAccessFromFileURLs(true);//设置WebView运行中的脚本可以是否访问任何原始起点内容，默认true
-        webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);//设置是否开启DOM存储API权限，默认false，未开启，设置为true，WebView能够使用DOM storage API
         webView.getSettings().setLoadsImagesAutomatically(true);//设置WebView是否加载图片资源，默认true，自动加载图片
@@ -324,6 +355,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     return super.shouldInterceptRequest(view, request);
                 }
             }
+
         });
 
         webView.setOnKeyListener(new View.OnKeyListener() {//防止遇到重定向
@@ -378,6 +410,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+    }
+
+    /**
+     * 启动X5 独立Web进程的预加载服务。优点：
+     * 1、后台启动，用户无感进程切换
+     * 2、启动进程服务后，有X5内核时，X5预加载内核
+     * 3、Web进程Crash时，不会使得整个应用进程crash掉
+     * 4、隔离主进程的内存，降低网页导致的App OOM概率。
+     * <p>
+     * 缺点：
+     * 进程的创建占用手机整体的内存，demo 约为 150 MB
+     */
+    private boolean startX5WebProcessPreinitService() {
+        String currentProcessName = QbSdk.getCurrentProcessName(this);
+        // 设置多进程数据目录隔离，不设置的话系统内核多个进程使用WebView会crash，X5下可能ANR
+        WebView.setDataDirectorySuffix(QbSdk.getCurrentProcessName(this));
+        Log.i(TAG, currentProcessName);
+        if (currentProcessName.equals(this.getPackageName())) {
+            this.startService(new Intent(this, X5ProcessInitService.class));
+            return true;
+        }
+        return false;
     }
 
     /**

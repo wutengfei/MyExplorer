@@ -4,13 +4,13 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.feige.myexplorer.R;
+import com.tencent.smtt.sdk.WebView;
 
 import java.util.ArrayList;
 import java.util.List;

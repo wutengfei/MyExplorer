@@ -3,9 +3,10 @@ package com.feige.myexplorer.utils;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
-import android.webkit.WebResourceResponse;
 
 import androidx.annotation.WorkerThread;
+
+import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

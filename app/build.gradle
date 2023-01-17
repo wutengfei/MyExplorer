@@ -5,7 +5,7 @@ android {
     buildToolsVersion "30.0.0"
 
     defaultConfig {
-        applicationId "com.feige.myexplorer"
+        applicationId "com.feige.myexplorerX5"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
@@ -13,17 +13,25 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    signingConfigs {
+        release {
+            keyAlias 'bjca'
+            keyPassword '111111'
+            storeFile file('../BJCA_Android.jks')
+            storePassword '111111'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     android.applicationVariants.all { variant ->
         variant.outputs.all {
             //这里修改apk文件名
-            outputFileName = "MyExplorer_V${defaultConfig.versionName}.apk"
+            outputFileName = "MyExplorer_X5_V${defaultConfig.versionName}.apk"
         }
     }
 }
