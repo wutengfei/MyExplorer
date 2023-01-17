@@ -22,7 +22,7 @@ public class AdBlocker {
     private static final String AD_HOSTS_FILE = "hosts.txt";
     private static final Set<String> AD_HOSTS = new HashSet<>();
 
-    public static void init(final Context context) {
+    public static void initAdHost(final Context context) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {

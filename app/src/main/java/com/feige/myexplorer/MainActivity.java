@@ -56,7 +56,7 @@ import cn.org.bjca.signet.component.qr.activity.SignetQrApi;
 import cn.org.bjca.signet.component.qr.bean.QrResultBean;
 import cn.org.bjca.signet.component.qr.callback.QrBaseCallBack;
 
-import static com.feige.myexplorer.utils.AdBlocker.init;
+import static com.feige.myexplorer.utils.AdBlocker.initAdHost;
 import static com.feige.myexplorer.utils.OtherUtils.showAlert;
 import static com.feige.myexplorer.utils.PicUtils.base64Url2bitmap;
 import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initView();
         initListener();
         initData();
-        init(context);
+        initAdHost(context);
     }
 
     private void initView() {
