@@ -25,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -44,14 +45,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.feige.myexplorer.adapter.MyAdapter;
+import com.feige.myexplorer.utils.AdBlocker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import cn.org.bjca.signet.component.qr.activity.SignetQrApi;
 import cn.org.bjca.signet.component.qr.bean.QrResultBean;
 import cn.org.bjca.signet.component.qr.callback.QrBaseCallBack;
 
+import static com.feige.myexplorer.utils.AdBlocker.init;
 import static com.feige.myexplorer.utils.OtherUtils.showAlert;
 import static com.feige.myexplorer.utils.PicUtils.base64Url2bitmap;
 import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
@@ -89,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initView();
         initListener();
         initData();
+        init(context);
     }
 
     private void initView() {
@@ -260,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        webView.setHorizontalScrollBarEnabled(false);// 取消Horizontal ScrollBar显示
         webView.setWebChromeClient(new MyWebChromeClient(context, mLayout, webview, ll_title));
         webView.setWebViewClient(new WebViewClient() {
+            private Map<String, Boolean> loadedUrls = new HashMap<>();
+
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
 //                Log.e(TAG, "onPageStarted: url-" + url);
@@ -299,6 +307,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
 
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                boolean ad;
+                if (!loadedUrls.containsKey(url)) {
+                    ad = AdBlocker.isAd(url);
+                    loadedUrls.put(url, ad);
+                } else {
+                    ad = loadedUrls.get(url);
+                }
+
+                if (ad) {
+                    return AdBlocker.createEmptyResource();
+                } else {
+                    return super.shouldInterceptRequest(view, request);
+                }
+            }
         });
 
         webView.setOnKeyListener(new View.OnKeyListener() {//防止遇到重定向
