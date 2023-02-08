@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
     private boolean isSelectAll;
     private ArrayList<String> data;
+    private String homePage = "file:///android_asset/active_pin.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initData() {
         initWebView(webview);
-
+//        webview.loadUrl(homePage);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -277,33 +279,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPageFinished(WebView view, String url) {
 //                Log.e(TAG, "onPageFinished: url-" + url);
-                et_url.setText(url);
+                if (!homePage.equals(url)) {
+                    et_url.setText(url);
+                }
                 super.onPageFinished(view, url);
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
                 String url = webResourceRequest.getUrl().toString();
+                Uri uri = Uri.parse(url);
+                String scheme = uri.getScheme();
+                String host = uri.getHost();
+
+//                Log.e(TAG, "shouldOverrideUrlLoading: scheme-" + scheme);
 //                Log.e(TAG, "shouldOverrideUrlLoading: url-" + url);
                 if (url.startsWith("http") || url.startsWith("https")) {
-                    WebView.HitTestResult hitTestResult = webView.getHitTestResult();
-                    //hitTestResult==null解决重定向问题
-                    if (!TextUtils.isEmpty(url) && hitTestResult == null) {
-                        webView.loadUrl(url);
-                        return true;
-                    } else {
-                        return super.shouldOverrideUrlLoading(webView, url);
-                    }
+                    return false;//返回false则webview继续加载url，返回true则停止加载url
                 } else {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
-                        return true;
-                    } catch (Exception e) {
-//                        Toast.makeText(MainActivity.this, "不支持的协议类型", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
 
+                    if (!TextUtils.isEmpty(scheme) && !TextUtils.isEmpty(host)) {
+                        if (scheme != null && scheme.contains("baidu")) {
+                            return true;
+                        }
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            Log.e(TAG, "shouldOverrideUrlLoading:不支持的协议类型-" + url);
+                        }
+                    }
+                    return true;
                 }
             }
 
@@ -324,6 +330,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     return super.shouldInterceptRequest(view, request);
                 }
             }
+
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                //在加载资源时过滤广告标签
+                //对网页加载速度稍有影响
+//                hidenBanner(view);
+//                hidenViewMore(view);
+                super.onLoadResource(view, url);
+            }
+
         });
 
         webView.setOnKeyListener(new View.OnKeyListener() {//防止遇到重定向
@@ -378,6 +394,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+    }
+
+    private void hidenBanner(WebView view) {
+        //JS，过滤带广告的Div标签(Daily)
+        String javascript = "javascript:function hideBanner() {" +
+                "var banners = document.getElementsByClassName('Daily');" +
+                "var firstbanner = banners[0];" +
+                "firstbanner.remove();" + "}";
+        view.loadUrl(javascript);
+        view.loadUrl("javascript:hideBanner();");
+    }
+
+    private void hidenViewMore(WebView view) {
+        //JS，过滤带广告的标签(view-more)
+        String javascript = "javascript:function hideViewMore() {" +
+                "var ViewMore = document.getElementsByClassName('view-more');" +
+                "var firstViewMore = ViewMore[0];" +
+                "firstViewMore.remove();" + "}";
+        view.loadUrl(javascript);
+        view.loadUrl("javascript:hideViewMore();");
     }
 
     /**
