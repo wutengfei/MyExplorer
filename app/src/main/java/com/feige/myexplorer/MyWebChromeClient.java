@@ -9,6 +9,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.annotation.RequiresApi;
 
@@ -22,16 +23,30 @@ public class MyWebChromeClient extends WebChromeClient {
     private Context context;
     private FrameLayout mLayout;
     private WebView webview;
+    private ProgressBar progress;
     private LinearLayout ll_title;
     private CustomViewCallback mCustomViewCallback;
     //  横屏时，显示视频的view
     private View mCustomView;
 
-    public MyWebChromeClient(Context context, FrameLayout frameLayout, WebView webView, LinearLayout ll_title) {
+    public MyWebChromeClient(Context context, FrameLayout frameLayout, WebView webView, LinearLayout ll_title, ProgressBar progress) {
         this.context = context;
         mLayout = frameLayout;
         webview = webView;
         this.ll_title = ll_title;
+        this.progress = progress;
+    }
+
+    @Override
+    public void onProgressChanged(WebView view, int newProgress) {
+        progress.setProgress(newProgress);
+        if (newProgress == 100) {
+            progress.setVisibility(View.INVISIBLE);//加载完网页进度条消失
+        } else {
+            progress.setVisibility(View.VISIBLE);//开始加载网页时显示进度条
+            progress.setProgress(newProgress);//设置进度值
+        }
+        super.onProgressChanged(view, newProgress);
     }
 
     // 全屏的时候调用

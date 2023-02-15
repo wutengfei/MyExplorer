@@ -37,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean mIsExit;
     private FrameLayout mLayout;
     private LinearLayout ll_title;
+    private ProgressBar progress;
     public static boolean isLandscape;
     private Context context;
     private static final int QRSCAN_REQ_CAMERA_PERMISSION = 776;
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webview = findViewById(R.id.webview);
         mLayout = findViewById(R.id.fl_video);
         ll_title = findViewById(R.id.ll_title);
+        progress = findViewById(R.id.progress);
     }
 
     private void initListener() {
@@ -142,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() {
-        initWebView(webview);
+        initWebView(webview, progress);
 //        webview.loadUrl(homePage);
     }
 
@@ -252,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         popupWindow.showAsDropDown(et_url);
     }
 
-    private void initWebView(final WebView webView) {
+    private void initWebView(final WebView webView, ProgressBar progress) {
         webView.getSettings().setDatabaseEnabled(true);
         webView.getSettings().setAllowFileAccess(true);//设置在WebView内部是否允许访问文件，默认允许访问。
         webView.getSettings().setAllowFileAccessFromFileURLs(true);//设置WebView运行中的一个文件方案被允许访问其他文件方案中的内容，默认值true
@@ -266,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 //        webView.setVerticalScrollBarEnabled(false);// 取消Vertical ScrollBar显示
 //        webView.setHorizontalScrollBarEnabled(false);// 取消Horizontal ScrollBar显示
-        webView.setWebChromeClient(new MyWebChromeClient(context, mLayout, webview, ll_title));
+        webView.setWebChromeClient(new MyWebChromeClient(context, mLayout, webview, ll_title, progress));
         webView.setWebViewClient(new WebViewClient() {
             private Map<String, Boolean> loadedUrls = new HashMap<>();
 
