@@ -226,23 +226,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PopupWindow popupWindow = new PopupWindow(popView, et_url.getWidth(), LinearLayout.LayoutParams.WRAP_CONTENT);
         if (data == null || data.size() == 0) {
             data = new ArrayList<String>();
-            data.add("http://m.keyou666.com");
-            data.add("https://www.80sl.com");
-            data.add("https://www.yszj.tv");
             data.add("http://k1k.cc/ju/list");
-            data.add("http://www.007xgt.com");
             data.add("http://www.bajjj.com");
-            data.add("https://www.chengshuwei.top");
             data.add("https://www.kuaiju5.com");
-            data.add("https://www.170dy.tv");
             data.add("https://www.jsdrtzn.com");
             data.add("http://www.imj6.com");
-            data.add("https://www.zwekj.com");
             data.add("https://meijui.cc");
             data.add("https://www.bbzmj.com");
             data.add("https://www.meijuw.com");
-            data.add("https://cucxsh.cn");
-            data.add("https://meijuii.cc");
             data.add("https://m.meijutt.org");
         }
         MyAdapter adapter = new MyAdapter(context, data, et_url, webview, popupWindow);
