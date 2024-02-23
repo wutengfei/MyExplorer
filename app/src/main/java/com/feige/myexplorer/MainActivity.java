@@ -257,9 +257,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView.getSettings().setDomStorageEnabled(true);//设置是否开启DOM存储API权限，默认false，未开启，设置为true，WebView能够使用DOM storage API
         webView.getSettings().setLoadsImagesAutomatically(true);//设置WebView是否加载图片资源，默认true，自动加载图片
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);//设置脚本是否允许自动打开弹窗，默认false，不允许
-
-//        webView.setVerticalScrollBarEnabled(false);// 取消Vertical ScrollBar显示
-//        webView.setHorizontalScrollBarEnabled(false);// 取消Horizontal ScrollBar显示
+        webView.setVerticalScrollBarEnabled(true);// 取消Vertical ScrollBar显示
+        webView.setHorizontalScrollBarEnabled(true);// 取消Horizontal ScrollBar显示
+        
+        webView.getSettings().setSupportZoom(true);
+        webView.getSettings().setBuiltInZoomControls(true);//设置支持缩放
+        webView.getSettings().setDisplayZoomControls(false);//设置是否显示缩放控件
+        webView.getSettings().setUseWideViewPort(true);//设置使用宽视图
+        webView.getSettings().setLoadWithOverviewMode(true);
         webView.setWebChromeClient(new MyWebChromeClient(context, mLayout, webview, ll_title, progress));
         webView.setWebViewClient(new WebViewClient() {
             private Map<String, Boolean> loadedUrls = new HashMap<>();
