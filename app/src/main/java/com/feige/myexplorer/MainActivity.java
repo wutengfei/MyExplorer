@@ -1,5 +1,10 @@
 package com.feige.myexplorer;
 
+import static com.feige.myexplorer.utils.AdBlocker.initAdHost;
+import static com.feige.myexplorer.utils.OtherUtils.showAlert;
+import static com.feige.myexplorer.utils.PicUtils.base64Url2bitmap;
+import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -58,11 +63,6 @@ import cn.org.bjca.signet.component.qr.activity.SignetQrApi;
 import cn.org.bjca.signet.component.qr.bean.QrResultBean;
 import cn.org.bjca.signet.component.qr.callback.QrBaseCallBack;
 
-import static com.feige.myexplorer.utils.AdBlocker.initAdHost;
-import static com.feige.myexplorer.utils.OtherUtils.showAlert;
-import static com.feige.myexplorer.utils.PicUtils.base64Url2bitmap;
-import static com.feige.myexplorer.utils.PicUtils.url2bitmap;
-
 /**
  * Author: wutengfei
  * Date: 2023/1/1
@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initData();
         initAdHost(context);
     }
+
 
     private void initView() {
         et_url = findViewById(R.id.et_url);
@@ -259,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);//设置脚本是否允许自动打开弹窗，默认false，不允许
         webView.setVerticalScrollBarEnabled(true);// 取消Vertical ScrollBar显示
         webView.setHorizontalScrollBarEnabled(true);// 取消Horizontal ScrollBar显示
-        
+
         webView.getSettings().setSupportZoom(true);
         webView.getSettings().setBuiltInZoomControls(true);//设置支持缩放
         webView.getSettings().setDisplayZoomControls(false);//设置是否显示缩放控件
@@ -334,8 +335,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onLoadResource(WebView view, String url) {
                 //在加载资源时过滤广告标签
                 //对网页加载速度稍有影响
-//                hidenBanner(view);
-//                hidenViewMore(view);
+
                 super.onLoadResource(view, url);
             }
 
@@ -395,15 +395,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void hidenBanner(WebView view) {
-        //JS，过滤带广告的Div标签(Daily)
-        String javascript = "javascript:function hideBanner() {" +
-                "var banners = document.getElementsByClassName('Daily');" +
-                "var firstbanner = banners[0];" +
-                "firstbanner.remove();" + "}";
-        view.loadUrl(javascript);
-        view.loadUrl("javascript:hideBanner();");
-    }
 
     private void hidenViewMore(WebView view) {
         //JS，过滤带广告的标签(view-more)
